@@ -4,7 +4,7 @@
 // Draw planet with transparency
 // Chapter 5 spacewar.cpp v1.0
 // This class is the core of the game
-
+//test of saving
 #include "spaceWar.h"
 
 //=============================================================================
