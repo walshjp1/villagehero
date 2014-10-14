@@ -1,0 +1,162 @@
+// Programming 2D Games
+// Copyright (c) 2011 by: 
+// Charles Kelly
+// Draw planet with transparency
+// Chapter 5 spacewar.cpp v1.0
+// This class is the core of the game
+
+#include "spaceWar.h"
+
+//=============================================================================
+// Constructor
+//=============================================================================
+Spacewar::Spacewar()
+{}
+
+//=============================================================================
+// Destructor
+//=============================================================================
+Spacewar::~Spacewar()
+{
+    releaseAll();           // call onLostDevice() for every graphics item
+}
+
+//=============================================================================
+// Initializes the game
+// Throws GameError on error
+//=============================================================================
+void Spacewar::initialize(HWND hwnd)
+{
+    Game::initialize(hwnd); // throws GameError
+
+	if (!sonyTexture.initialize(graphics, SONY_IMAGE))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Sony texture initialization failed"));
+	if (!sony.initialize(graphics, 0,0,0, &sonyTexture))
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error init sony"));
+	sony.setX(GAME_WIDTH/2 - (sony.getWidth()*SONY_IMAGE_SCALE)/2);
+	sony.setY(GAME_HEIGHT/2 - (sony.getHeight()*SONY_IMAGE_SCALE)/2);
+	sony.setScale(SONY_IMAGE_SCALE);
+	
+
+	//Stuff for physics
+	sonyPos.xPos = sony.getX();
+	sonyPos.yPos = sony.getY();
+	
+	sonyVel.xVel = 0;
+	sonyVel.yVel = 0;
+    return;
+}
+
+//=============================================================================
+// Update all game items
+//=============================================================================
+void Spacewar::update()
+{
+
+//WRAP
+ sonyPos.xPos += sonyVel.xVel + frameTime;
+ sony.setX(sonyPos.xPos);
+
+ sonyPos.yPos += sonyVel.yVel + frameTime;
+ sony.setY(sonyPos.yPos);
+
+//REFLECT
+ if((sonyPos.xPos + sony.getWidth() * sony.getScale()) >= GAME_WIDTH){
+	 sonyVel.xVel *= -1;
+ }
+ if((sonyPos.xPos <= 0)){
+	 sonyVel.xVel *= -1;
+ }
+ if((sonyPos.yPos + sony.getHeight() * sony.getScale()) >= GAME_HEIGHT){
+	sonyVel.yVel *= -1;
+ }
+ if(sonyPos.yPos <= 0){
+	 sonyVel.yVel *= -1;
+ }
+ ////////////////
+// INPUT MODS
+ ////////////////
+
+if(input->getMouseRButton() == true){
+	sony.setDegrees(sony.getDegrees() + 1);
+}
+if(input->getMouseLButton() == true){
+	sony.setDegrees(sony.getDegrees() - 1);
+}
+if(input->isKeyDown(0x57) || input->isKeyDown(VK_UP)){
+	sonyVel.yVel = -1;
+	sonyPos.yPos += sonyVel.yVel + frameTime;
+	sony.setY(sonyPos.yPos);
+	sonyVel.yVel = 0;
+}
+if(input->isKeyDown(0x53) || input->isKeyDown(VK_DOWN)){
+	sonyVel.yVel = 1;
+	sonyPos.yPos += sonyVel.yVel + frameTime;
+	sony.setY(sonyPos.yPos);
+	sonyVel.yVel = 0;
+}
+if(input->isKeyDown(0x41)  || input->isKeyDown(VK_LEFT)){
+ sonyVel.xVel = -1;
+ sonyPos.xPos += sonyVel.xVel + frameTime;
+ sony.setX(sonyPos.xPos);
+ sonyVel.xVel = 0;
+}
+if(input->isKeyDown(0x44)  || input->isKeyDown(VK_RIGHT)){
+ sonyVel.xVel = 1;
+ sonyPos.xPos += sonyVel.xVel + frameTime;
+ sony.setX(sonyPos.xPos);
+ sonyVel.xVel = 0;
+}
+
+}
+
+//=============================================================================
+// Artificial Intelligence
+//=============================================================================
+void Spacewar::ai()
+{}
+
+//=============================================================================
+// Handle collisions
+//=============================================================================
+void Spacewar::collisions()
+{}
+
+//=============================================================================
+// Render game items
+//=============================================================================
+void Spacewar::render()
+{
+    graphics->spriteBegin();                // begin drawing sprites
+
+	sony.draw();
+
+	
+
+    graphics->spriteEnd();                  // end drawing sprites
+}
+
+//=============================================================================
+// The graphics device was lost.
+// Release all reserved video memory so graphics device may be reset.
+//=============================================================================
+void Spacewar::releaseAll()
+{
+	sonyTexture.onLostDevice();
+
+    Game::releaseAll();
+    return;
+}
+
+//=============================================================================
+// The grahics device has been reset.
+// Recreate all surfaces.
+//=============================================================================
+void Spacewar::resetAll()
+{
+   
+	sonyTexture.onResetDevice();
+
+    Game::resetAll();
+    return;
+}
